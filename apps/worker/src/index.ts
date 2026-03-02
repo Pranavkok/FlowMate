@@ -1,13 +1,8 @@
-require('dotenv').config()
-
-import { PrismaClient } from "@prisma/client";
-import { JsonObject } from "@prisma/client/runtime/library";
+import { prisma as prismaClient } from "@repo/db";
 import { Kafka } from "kafkajs";
 import { parse } from "./parser";
 import { sendEmail } from "./email";
 import { sendSol } from "./solana";
-
-const prismaClient = new PrismaClient();
 const TOPIC_NAME = "zap-events"
 
 const kafka = new Kafka({
@@ -65,16 +60,16 @@ async function main() {
             const zapRunMetadata = zapRunDetails?.metadata;
 
             if (currentAction.type.id === "email") {
-                const body = parse((currentAction.metadata as JsonObject)?.body as string, zapRunMetadata);
-                const to = parse((currentAction.metadata as JsonObject)?.email as string, zapRunMetadata);
+                const body = parse((currentAction.metadata as Record<string, unknown>)?.body as string, zapRunMetadata);
+                const to = parse((currentAction.metadata as Record<string, unknown>)?.email as string, zapRunMetadata);
                 console.log(`Sending out email to ${to} body is ${body}`)
                 await sendEmail(to, body);
             }
 
             if (currentAction.type.id === "send-sol") {
 
-                const amount = parse((currentAction.metadata as JsonObject)?.amount as string, zapRunMetadata);
-                const address = parse((currentAction.metadata as JsonObject)?.address as string, zapRunMetadata);
+                const amount = parse((currentAction.metadata as Record<string, unknown>)?.amount as string, zapRunMetadata);
+                const address = parse((currentAction.metadata as Record<string, unknown>)?.address as string, zapRunMetadata);
                 console.log(`Sending out SOL of ${amount} to address ${address}`);
                 await sendSol(address, amount);
             }

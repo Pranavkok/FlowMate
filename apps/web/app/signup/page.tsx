@@ -17,14 +17,18 @@ const perks = [
 
 export default function Signup() {
     const router = useRouter();
-    const [form, setForm] = useState({ username: "", password: "" });
+    const [form, setForm] = useState({ name: "", username: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!form.username || !form.password) {
+        if (!form.name || !form.username || !form.password) {
             toast.error("Please fill in all fields");
+            return;
+        }
+        if (form.name.length < 3) {
+            toast.error("Name must be at least 3 characters");
             return;
         }
         if (form.password.length < 6) {
@@ -105,6 +109,17 @@ export default function Signup() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
+                            <input
+                                type="text"
+                                value={form.name}
+                                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                                placeholder="John Doe"
+                                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                            />
+                        </div>
+
                         <div>
                             <label className="block text-sm font-medium text-foreground mb-1.5">Username / Email</label>
                             <input

@@ -19,32 +19,35 @@ router.post("/signup", async (req, res) => {
         })
     }
 
-    const userExists = await prisma.user.findFirst({
-        where: {
-            email: parsedData.data.username
-        }
-    });
+    try {
+        const userExists = await prisma.user.findFirst({
+            where: {
+                email: parsedData.data.username
+            }
+        });
 
-    if (userExists) {
-        return res.status(403).json({
-            message: "User already exists"
+        if (userExists) {
+            return res.status(403).json({
+                message: "User already exists"
+            })
+        }
+
+        await prisma.user.create({
+            data: {
+                email: parsedData.data.username,
+                // TODO: Dont store passwords in plaintext, hash it
+                password: parsedData.data.password,
+                name: parsedData.data.name
+            }
         })
+
+        return res.json({
+            message: "Please verify your account by checking your email"
+        });
+    } catch (e) {
+        console.error(e);
+        return res.status(500).json({ message: "Internal server error" });
     }
-
-    await prisma.user.create({
-        data: {
-            email: parsedData.data.username,
-            // TODO: Dont store passwords in plaintext, hash it
-            password: parsedData.data.password,
-            name: parsedData.data.name
-        }
-    })
-
-    // await sendEmail();
-
-    return res.json({
-        message: "Please verify your account by checking your email"
-    });
 
 })
 

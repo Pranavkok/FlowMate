@@ -218,7 +218,7 @@ export default function ZapCreate() {
 
                     <div className="space-y-4">
                         {/* Trigger Block */}
-                        <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
+                        <div className="bg-card rounded-2xl border border-border shadow-card">
                             <div className="px-5 py-3.5 bg-amber-light border-b border-amber/20 flex items-center gap-2">
                                 <div className="w-6 h-6 rounded-md bg-amber/20 flex items-center justify-center">
                                     <span className="text-xs font-bold text-amber-dark">1</span>
@@ -263,7 +263,7 @@ export default function ZapCreate() {
                             const fields = action.actionName ? getMetadataFields(action.actionName) : [];
                             return (
                                 <div key={idx}>
-                                    <div className="bg-card rounded-2xl border border-border shadow-card overflow-hidden">
+                                    <div className="bg-card rounded-2xl border border-border shadow-card">
                                         <div className="px-5 py-3.5 bg-primary-light border-b border-primary/20 flex items-center gap-2">
                                             <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
                                                 <span className="text-xs font-bold text-primary">{idx + 2}</span>
