@@ -1,135 +1,254 @@
-# Turborepo starter
+# ⚡ FlowMate
 
-This Turborepo starter is maintained by the Turborepo core team.
-
-## Using this example
-
-Run the following command:
-
-```sh
-npx create-turbo@latest
-```
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
+> **Automate your workflow, reclaim your time.**
+> Connect triggers to actions and let FlowMate handle the rest — no code needed!
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
+███████╗██╗      ██████╗ ██╗    ██╗███╗   ███╗ █████╗ ████████╗███████╗
+██╔════╝██║     ██╔═══██╗██║    ██║████╗ ████║██╔══██╗╚══██╔══╝██╔════╝
+█████╗  ██║     ██║   ██║██║ █╗ ██║██╔████╔██║███████║   ██║   █████╗
+██╔══╝  ██║     ██║   ██║██║███╗██║██║╚██╔╝██║██╔══██║   ██║   ██╔══╝
+██║     ███████╗╚██████╔╝╚███╔███╔╝██║ ╚═╝ ██║██║  ██║   ██║   ███████╗
+╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝ ╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+---
+
+## 🗺️ How It All Works
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
+  🌐 Webhook hits                📬 Outbox polled               ⚙️ Actions run!
+  ┌─────────────┐               ┌──────────────┐               ┌───────────────┐
+  │  Hook Server│──── writes ──►│  PostgreSQL  │◄── polls ────│   Processor   │
+  │  :3002  🪝  │               │  :5439  🐘   │               │               │
+  └─────────────┘               └──────────────┘               └───────┬───────┘
+                                                                         │
+  ┌─────────────┐               ┌──────────────┐               ┌───────▼───────┐
+  │  Next.js 🎨 │──── REST ────►│  HTTP API    │    Kafka 📨   │    Worker     │
+  │  :3001      │               │  :3000  🚀   │◄──────────────│  ✉️ ◎ 💬 🌐   │
+  └─────────────┘               └──────────────┘               └───────────────┘
 ```
 
-### Develop
+> **The magic:** Webhook fires → writes `ZapRun` + `ZapRunOutbox` row → Processor polls outbox & pushes to Kafka → Worker consumes & runs your actions. 🎯
 
-To develop all apps and packages, run the following command:
+---
 
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## 📦 What's Inside
 
 ```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
+code/
+├── 🎨 apps/web          → Next.js 16 frontend        (port 3001)
+├── 🚀 apps/http         → Express REST API            (port 3000)
+├── 🪝 apps/hook         → Webhook receiver            (port 3002)
+├── ⚙️  apps/processor   → Outbox → Kafka publisher
+├── 🔧 apps/worker       → Kafka consumer + executor
+└── 🗄️  packages/db      → Prisma schema + client (@repo/db)
 ```
 
-### Remote Caching
+---
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+## 🛠️ Tech Stack
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+| 🏷️ Layer | 🔧 Tech |
+|---|---|
+| 🎨 Frontend | Next.js 16, Tailwind CSS v4, Sonner |
+| 🚀 API | Express.js, Zod, JWT |
+| 🗄️ Database | PostgreSQL 15, Prisma ORM |
+| 📨 Messaging | Apache Kafka (KafkaJS) |
+| 📦 Monorepo | Turborepo + pnpm workspaces |
+| ⚙️ Runtime | Node.js v24, tsx |
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+---
+
+## ⚡ Triggers & Actions
+
+### 🔫 Triggers — *"When this happens..."*
+
+| Trigger | Description |
+|---|---|
+| 🪝 **Webhook** | HTTP POST to `/hooks/catch/:userId/:zapId` |
+| 🕐 **Schedule** | Runs every N minutes (set per Zap) |
+
+### 🎬 Actions — *"...do this!"*
+
+| Action | Description |
+|---|---|
+| ✉️ **Email** | Send via Gmail SMTP |
+| ◎ **Solana Transfer** | Send SOL to a wallet address |
+| 💬 **Slack** | Post to a Slack webhook |
+| 🎮 **Discord** | Post to a Discord webhook |
+| 🌐 **HTTP Request** | Call any external URL (GET / POST) |
+| 📋 **Log** | Print a labeled log message |
+
+> 💡 **Pro tip:** Use `{body.field}` in any config value — it gets replaced with the webhook payload at runtime!
+>
+> Example: `"Payment received: {body.amount} SOL"` → `"Payment received: 2.5 SOL"`
+
+---
+
+## 🚀 Getting Started
+
+### Step 1 — Fire up the infrastructure 🐳
+
+```bash
+docker compose up -d
+```
+
+Spins up:
+- 🐘 **PostgreSQL** on port `5439`
+- 📨 **Kafka + Zookeeper** on port `9092`
+
+---
+
+### Step 2 — Install everything 📦
+
+```bash
+pnpm install
+```
+
+---
+
+### Step 3 — Create your `.env` files 🔑
+
+**`apps/http/.env`**
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5439/flowly"
+JWT_PASSWORD="your-super-secret-jwt-password"
+```
+
+**`apps/hook/.env`**
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5439/flowly"
+```
+
+**`apps/processor/.env`**
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5439/flowly"
+```
+
+**`apps/worker/.env`**
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5439/flowly"
+SMTP_ENDPOINT="smtp.gmail.com"
+SMTP_USERNAME="your@gmail.com"
+SMTP_PASSWORD="your-gmail-app-password"
+SOL_PRIVATE_KEY="your-solana-private-key-base58"
+```
+
+---
+
+### Step 4 — Migrate & seed the database 🌱
+
+```bash
+cd packages/db
+npx prisma migrate dev
+npx tsx seed.ts
+```
+
+This creates all the tables and seeds the available triggers + actions. ✅
+
+---
+
+### Step 5 — Run everything! 🎉
+
+```bash
+pnpm run dev
+```
+
+| 🟢 Service | 🌐 Port | 📝 What it does |
+|---|---|---|
+| `web` | **3001** | The cartoonish frontend UI |
+| `http` | **3000** | REST API (auth, zaps, triggers) |
+| `hook` | **3002** | Receives incoming webhooks |
+| `processor` | — | Polls outbox → pushes to Kafka |
+| `worker` | — | Consumes Kafka → runs actions |
+
+---
+
+## 🗺️ API Reference
+
+### 🔐 Auth
+```
+POST /api/v1/user/signup    →  { name, username, password }
+POST /api/v1/user/signin    →  { username, password }
+```
+
+### ⚡ Zaps  *(needs `Authorization: Bearer <token>`)*
+```
+GET  /api/v1/zap            →  List all your zaps
+POST /api/v1/zap            →  Create a new zap
+GET  /api/v1/zap/:zapId     →  Get one zap
+```
+
+### 🔍 Options
+```
+GET /api/v1/trigger/available   →  All available triggers
+GET /api/v1/action/available    →  All available actions
+```
+
+### 🪝 Webhooks
+```
+POST /hooks/catch/:userId/:zapId   →  { ...your payload }
+```
+
+---
+
+## 🎮 Build Your First Zap
 
 ```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
+  1️⃣  Sign up          →   http://localhost:3001/signup
+       ↓
+  2️⃣  New Zap          →   Dashboard → "+ New Zap"
+       ↓
+  3️⃣  Pick a trigger   →   e.g. "Webhook"
+       ↓
+  4️⃣  Add actions      →   e.g. Email → Slack
+       ↓
+  5️⃣  Publish!         →   Click "Publish Zap" ⚡
+       ↓
+  6️⃣  Fire it!         →   Copy webhook URL → send a POST
 ```
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
+```bash
+# 🔥 Fire your Zap!
+curl -X POST http://localhost:3002/hooks/catch/1/<your-zap-id> \
+  -H "Content-Type: application/json" \
+  -d '{"type": "payment", "amount": 2.5, "from": "alice"}'
 ```
 
-## Useful Links
+---
 
-Learn more about the power of Turborepo:
+## 🗄️ Database Schema
 
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+```
+👤 User
+ └── ⚡ Zap (many)
+      ├── 🔫 Trigger ──────► 🎯 AvailableTrigger
+      ├── 🎬 Action[] ─────► 🎯 AvailableAction
+      └── 📝 ZapRun[]
+           └── 📤 ZapRunOutbox   ← processor deletes after Kafka publish
+```
+
+Key fields:
+- **`Trigger.lastRunAt`** — tracks last schedule run time
+- **`Action.sortingOrder`** — determines execution order in multi-step Zaps
+- **`ZapRunOutbox`** — the transactional outbox; guarantees at-least-once delivery
+
+---
+
+## 🐛 Dev Gotchas
+
+> **KafkaJS + Node v24** 🔴
+> `processor` and `worker` use `node --import tsx/esm --watch` (NOT `tsx watch`) to avoid an ECANCELED error caused by KafkaJS's sync file reads conflicting with tsx's CJS transformer.
+
+> **tsx watching node_modules** 🔴
+> `http` and `hook` use `tsx watch --ignore node_modules` to stop the server from restarting every time a package file changes.
+
+> **dotenv not auto-loaded** 🔴
+> tsx doesn't auto-load `.env`. Each app has `import "dotenv/config"` as its very first line.
+
+---
+
+## 📄 License
+
+MIT — build cool stuff! 🚀
