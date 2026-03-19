@@ -33,10 +33,15 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [userId, setUserId] = useState<string>("1");
 
     const fetchZaps = async () => {
         const token = localStorage.getItem("token");
         if (!token) { router.push("/login"); return; }
+        try {
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            if (payload?.id) setUserId(String(payload.id));
+        } catch {}
         setLoading(true);
         setError(null);
         try {
@@ -56,7 +61,7 @@ export default function Dashboard() {
 
     useEffect(() => { fetchZaps(); }, []);
 
-    const getWebhookUrl = (zapId: string) => `${HOOKS_URL}/hooks/catch/1/${zapId}`;
+    const getWebhookUrl = (zapId: string) => `${HOOKS_URL}/hooks/catch/${userId}/${zapId}`;
 
     const copyWebhook = async (zapId: string) => {
         await navigator.clipboard.writeText(getWebhookUrl(zapId));
@@ -70,8 +75,10 @@ export default function Dashboard() {
         return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     };
 
+    const cardColors = ["bg-yellow-100", "bg-pink-100", "bg-cyan-100", "bg-purple-100", "bg-orange-100", "bg-green-100"];
+
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-[#FEFCE8]">
             <Navbar />
             <main className="pt-24 pb-16 px-6">
                 <div className="max-w-6xl mx-auto">
@@ -79,8 +86,10 @@ export default function Dashboard() {
                     {/* Header */}
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-10">
                         <div>
-                            <h1 className="font-display text-3xl font-700 text-charcoal mb-1">Your Zaps</h1>
-                            <p className="text-muted-foreground">
+                            <div className="inline-block bg-cyan-300 border-2 border-black shadow-[3px_3px_0_#1a1a1a] rounded-xl px-4 py-2 mb-3">
+                                <h1 className="font-black text-2xl text-black">Your Zaps ⚡</h1>
+                            </div>
+                            <p className="font-medium text-gray-600">
                                 {!loading && `${zaps.length} workflow${zaps.length !== 1 ? "s" : ""} active`}
                             </p>
                         </div>
@@ -88,14 +97,14 @@ export default function Dashboard() {
                             <button
                                 onClick={fetchZaps}
                                 disabled={loading}
-                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium text-muted-foreground bg-card border border-border hover:border-primary/30 hover:text-foreground transition-all shadow-card"
+                                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-black text-black bg-white border-2 border-black shadow-[3px_3px_0_#1a1a1a] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#1a1a1a] transition-all disabled:opacity-50"
                             >
                                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                                 Refresh
                             </button>
                             <Link
                                 href="/zap/create"
-                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold bg-emerald-gradient text-primary-foreground shadow-emerald hover:opacity-90 transition-all"
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-black text-white bg-black border-2 border-black shadow-[3px_3px_0_#06D6A0] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#06D6A0] transition-all"
                             >
                                 <Plus className="w-4 h-4" />
                                 New Zap
@@ -103,38 +112,42 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    {/* States */}
+                    {/* Loading */}
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-24 gap-4">
-                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                            <p className="text-muted-foreground text-sm">Loading your workflows…</p>
+                            <div className="w-16 h-16 rounded-2xl bg-yellow-300 border-2 border-black shadow-[4px_4px_0_#1a1a1a] flex items-center justify-center">
+                                <Loader2 className="w-8 h-8 animate-spin text-black" />
+                            </div>
+                            <p className="font-bold text-gray-600">Loading your workflows…</p>
                         </div>
                     )}
 
+                    {/* Error */}
                     {error && !loading && (
                         <div className="flex flex-col items-center justify-center py-24 gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                                <AlertCircle className="w-6 h-6 text-destructive" />
+                            <div className="w-16 h-16 rounded-2xl bg-red-300 border-2 border-black shadow-[4px_4px_0_#1a1a1a] flex items-center justify-center">
+                                <AlertCircle className="w-8 h-8 text-black" />
                             </div>
-                            <p className="text-muted-foreground text-sm">{error}</p>
-                            <button onClick={fetchZaps} className="text-sm font-medium text-primary underline underline-offset-2">
+                            <p className="font-bold text-gray-700">{error}</p>
+                            <button onClick={fetchZaps} className="px-5 py-2.5 rounded-xl font-black text-white bg-black border-2 border-black shadow-[3px_3px_0_#FF4D6D] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0_#FF4D6D] transition-all text-sm">
                                 Try again
                             </button>
                         </div>
                     )}
 
+                    {/* Empty state */}
                     {!loading && !error && zaps.length === 0 && (
                         <div className="flex flex-col items-center justify-center py-24 gap-5">
-                            <div className="w-16 h-16 rounded-3xl bg-emerald-light flex items-center justify-center">
-                                <Zap className="w-8 h-8 text-emerald" />
+                            <div className="w-20 h-20 rounded-3xl bg-yellow-300 border-2 border-black shadow-[5px_5px_0_#1a1a1a] flex items-center justify-center animate-wiggle">
+                                <Zap className="w-10 h-10 text-black fill-black" />
                             </div>
                             <div className="text-center">
-                                <h3 className="font-display font-600 text-lg text-foreground mb-1">No Zaps yet</h3>
-                                <p className="text-muted-foreground text-sm">Create your first automation to get started</p>
+                                <h3 className="font-black text-xl text-black mb-1">No Zaps yet!</h3>
+                                <p className="font-medium text-gray-600">Create your first automation to get started</p>
                             </div>
                             <Link
                                 href="/zap/create"
-                                className="flex items-center gap-2 px-6 py-3 rounded-xl font-semibold bg-emerald-gradient text-primary-foreground shadow-emerald hover:opacity-90 transition-all"
+                                className="flex items-center gap-2 px-7 py-3 rounded-xl font-black text-white bg-black border-2 border-black shadow-[4px_4px_0_#06D6A0] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#06D6A0] transition-all"
                             >
                                 <Plus className="w-4 h-4" />
                                 Create your first Zap
@@ -142,54 +155,50 @@ export default function Dashboard() {
                         </div>
                     )}
 
+                    {/* Zap cards */}
                     {!loading && !error && zaps.length > 0 && (
-                        <div className="space-y-4">
-                            {/* Table header */}
-                            <div className="hidden md:grid grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-4 px-5 py-2">
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Zap ID</span>
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Trigger</span>
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Actions</span>
-                                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Created</span>
-                            </div>
-
-                            {zaps.map((zap) => (
+                        <div className="grid gap-4">
+                            {zaps.map((zap, i) => (
                                 <div
                                     key={zap.id}
-                                    className="bg-card-gradient border border-border rounded-2xl p-5 shadow-card hover:shadow-card-hover transition-all group"
+                                    className={`${cardColors[i % cardColors.length]} border-2 border-black rounded-2xl p-5 shadow-[4px_4px_0_#1a1a1a] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#1a1a1a] transition-all group`}
                                 >
                                     <div className="grid md:grid-cols-[2fr_1.5fr_1.5fr_1fr] gap-4 items-center">
                                         {/* ID + Webhook */}
                                         <div>
-                                            <div className="flex items-center gap-2 mb-1.5">
-                                                <div className="w-7 h-7 rounded-lg bg-emerald-light flex items-center justify-center">
-                                                    <Zap className="w-3.5 h-3.5 text-emerald" />
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <div className="w-8 h-8 rounded-lg bg-yellow-300 border-2 border-black flex items-center justify-center">
+                                                    <Zap className="w-4 h-4 text-black fill-black" />
                                                 </div>
-                                                <span className="font-display font-600 text-sm text-foreground">{zap.id.slice(0, 8)}…</span>
-                                                <span className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-light text-emerald text-xs font-medium">
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald animate-pulse-soft" />
+                                                <span className="font-black text-sm text-black">{zap.id.slice(0, 8)}…</span>
+                                                <span className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C8F0D4] border-2 border-black text-xs font-black text-black">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-[#06D6A0] animate-pulse" />
                                                     Active
                                                 </span>
                                             </div>
                                             {/* Webhook URL */}
-                                            <div className="flex items-center gap-1.5 bg-muted rounded-lg px-2.5 py-1.5 group/webhook cursor-pointer" onClick={() => copyWebhook(zap.id)}>
-                                                <Link2 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                                                <span className="text-xs text-muted-foreground truncate max-w-[160px]">
+                                            <div
+                                                className="flex items-center gap-1.5 bg-white/70 border border-black/20 rounded-lg px-2.5 py-1.5 cursor-pointer hover:bg-white transition-colors"
+                                                onClick={() => copyWebhook(zap.id)}
+                                            >
+                                                <Link2 className="w-3 h-3 text-gray-500 flex-shrink-0" />
+                                                <span className="text-xs font-medium text-gray-600 truncate max-w-[160px]">
                                                     {getWebhookUrl(zap.id)}
                                                 </span>
                                                 {copiedId === zap.id ? (
-                                                    <Check className="w-3 h-3 text-emerald ml-auto flex-shrink-0" />
+                                                    <Check className="w-3 h-3 text-[#06D6A0] ml-auto flex-shrink-0" />
                                                 ) : (
-                                                    <Copy className="w-3 h-3 text-muted-foreground ml-auto flex-shrink-0 opacity-0 group-hover/webhook:opacity-100 transition-opacity" />
+                                                    <Copy className="w-3 h-3 text-gray-400 ml-auto flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Trigger */}
                                         <div>
-                                            <span className="text-xs text-muted-foreground md:hidden block mb-1">Trigger</span>
-                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-light border border-amber/20">
+                                            <span className="text-xs font-black text-gray-500 md:hidden block mb-1">TRIGGER</span>
+                                            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-yellow-300 border-2 border-black shadow-[2px_2px_0_#1a1a1a]">
                                                 <span className="text-sm">⚡</span>
-                                                <span className="text-xs font-medium text-amber-dark">
+                                                <span className="text-xs font-black text-black">
                                                     {zap.trigger?.type?.name || "Webhook"}
                                                 </span>
                                             </div>
@@ -197,26 +206,33 @@ export default function Dashboard() {
 
                                         {/* Actions */}
                                         <div>
-                                            <span className="text-xs text-muted-foreground md:hidden block mb-1">Actions</span>
+                                            <span className="text-xs font-black text-gray-500 md:hidden block mb-1">ACTIONS</span>
                                             <div className="flex flex-wrap gap-1.5">
-                                                {(zap.actions || []).slice(0, 3).map((action, i) => (
-                                                    <div key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-secondary border border-border">
-                                                        <span className="text-xs">
-                                                            {action.type?.name?.toLowerCase().includes("email") ? "✉️" :
-                                                                action.type?.name?.toLowerCase().includes("sol") ? "◎" : "⚙️"}
-                                                        </span>
-                                                        <span className="text-xs font-medium text-secondary-foreground">
-                                                            {action.type?.name || "Action"}
-                                                        </span>
-                                                    </div>
-                                                ))}
+                                                {(zap.actions || []).slice(0, 3).map((action, j) => {
+                                                    const actionBg = ["bg-pink-300", "bg-cyan-300", "bg-purple-300"][j % 3];
+                                                    return (
+                                                        <div key={j} className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${actionBg} border-2 border-black shadow-[2px_2px_0_#1a1a1a]`}>
+                                                            <span className="text-xs">
+                                                                {action.type?.name?.toLowerCase().includes("email") ? "✉️" :
+                                                                 action.type?.name?.toLowerCase().includes("sol") ? "◎" :
+                                                                 action.type?.name?.toLowerCase().includes("slack") ? "💬" :
+                                                                 action.type?.name?.toLowerCase().includes("discord") ? "🎮" :
+                                                                 action.type?.name?.toLowerCase().includes("http") ? "🌐" :
+                                                                 action.type?.name?.toLowerCase().includes("log") ? "📋" : "⚙️"}
+                                                            </span>
+                                                            <span className="text-xs font-black text-black">
+                                                                {action.type?.name || "Action"}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
                                                 {(zap.actions || []).length > 3 && (
-                                                    <div className="px-2.5 py-1 rounded-lg bg-muted text-xs text-muted-foreground">
-                                                        +{(zap.actions || []).length - 3} more
+                                                    <div className="px-2.5 py-1 rounded-lg bg-white border-2 border-black text-xs font-black text-black">
+                                                        +{(zap.actions || []).length - 3}
                                                     </div>
                                                 )}
                                                 {(!zap.actions || zap.actions.length === 0) && (
-                                                    <span className="text-xs text-muted-foreground">No actions</span>
+                                                    <span className="text-xs font-medium text-gray-500">No actions</span>
                                                 )}
                                             </div>
                                         </div>
@@ -224,14 +240,14 @@ export default function Dashboard() {
                                         {/* Date */}
                                         <div className="flex items-center justify-between md:justify-start gap-4">
                                             <div>
-                                                <span className="text-xs text-muted-foreground md:hidden block mb-1">Created</span>
-                                                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                                                <span className="text-xs font-black text-gray-500 md:hidden block mb-1">CREATED</span>
+                                                <div className="flex items-center gap-1.5 text-xs font-medium text-gray-600">
                                                     <Calendar className="w-3 h-3" />
                                                     {formatDate(zap.createdAt)}
                                                 </div>
                                             </div>
-                                            <button className="md:ml-auto p-1.5 rounded-lg hover:bg-muted transition-colors opacity-0 group-hover:opacity-100">
-                                                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+                                            <button className="md:ml-auto p-2 rounded-lg border-2 border-black bg-white shadow-[2px_2px_0_#1a1a1a] opacity-0 group-hover:opacity-100 hover:bg-yellow-100 transition-all">
+                                                <ExternalLink className="w-3.5 h-3.5 text-black" />
                                             </button>
                                         </div>
                                     </div>

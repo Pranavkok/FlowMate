@@ -4,12 +4,19 @@ import jwt from "jsonwebtoken";
 const JWT_PASSWORD = process.env.JWT_PASSWORD as string || "secret";
 
 export function authMiddleware (req: Request, res: Response, next: NextFunction) {
-    const token = req.headers.authorization as unknown as string;
+    const authHeader = req.headers.authorization as unknown as string;
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(403).json({
+            message: "You are not logged in"
+        })
+    }
+    
+    const token = authHeader.split(' ')[1];
     
     try {
-        const payload = jwt.verify(token, JWT_PASSWORD);
-        // @ts-ignore
-        req.id = payload.id
+        const payload = jwt.verify(token!, JWT_PASSWORD) as any;
+        (req as any).id = payload.id
         next();
     } catch(e) {
         return res.status(403).json({

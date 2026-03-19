@@ -16,6 +16,7 @@
   },
   "scripts": {
     "build": "tsc -b && prisma generate",
+    "seed": "tsx seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

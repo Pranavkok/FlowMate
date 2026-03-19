@@ -3,6 +3,10 @@ import { Kafka } from "kafkajs";
 import { parse } from "./parser";
 import { sendEmail } from "./email";
 import { sendSol } from "./solana";
+import { sendSlackMessage } from "./slack";
+import { sendDiscordMessage } from "./discord";
+import { makeHttpRequest } from "./httpRequest";
+
 const TOPIC_NAME = "zap-events"
 
 const kafka = new Kafka({
@@ -67,17 +71,45 @@ async function main() {
             }
 
             if (currentAction.type.id === "send-sol") {
-
                 const amount = parse((currentAction.metadata as Record<string, unknown>)?.amount as string, zapRunMetadata);
                 const address = parse((currentAction.metadata as Record<string, unknown>)?.address as string, zapRunMetadata);
                 console.log(`Sending out SOL of ${amount} to address ${address}`);
                 await sendSol(address, amount);
             }
 
-            // 
+            if (currentAction.type.id === "log-action") {
+                const label = parse(
+                    (currentAction.metadata as Record<string, unknown>)?.label as string ?? "ZapRun",
+                    zapRunMetadata
+                );
+                console.log(`[LOG ACTION] ${label}`, JSON.stringify(zapRunMetadata, null, 2));
+            }
+
+            if (currentAction.type.id === "slack-action") {
+                const webhookUrl = parse((currentAction.metadata as Record<string, unknown>)?.webhookUrl as string, zapRunMetadata);
+                const message = parse((currentAction.metadata as Record<string, unknown>)?.message as string, zapRunMetadata);
+                console.log(`Sending Slack message`);
+                await sendSlackMessage(webhookUrl, message);
+            }
+
+            if (currentAction.type.id === "discord-action") {
+                const webhookUrl = parse((currentAction.metadata as Record<string, unknown>)?.webhookUrl as string, zapRunMetadata);
+                const message = parse((currentAction.metadata as Record<string, unknown>)?.message as string, zapRunMetadata);
+                console.log(`Sending Discord message`);
+                await sendDiscordMessage(webhookUrl, message);
+            }
+
+            if (currentAction.type.id === "http-action") {
+                const url = parse((currentAction.metadata as Record<string, unknown>)?.url as string, zapRunMetadata);
+                const method = parse((currentAction.metadata as Record<string, unknown>)?.method as string ?? "GET", zapRunMetadata);
+                const body = parse((currentAction.metadata as Record<string, unknown>)?.body as string ?? "", zapRunMetadata);
+                console.log(`Making HTTP ${method} to ${url}`);
+                await makeHttpRequest(url, method, body);
+            }
+
             await new Promise(r => setTimeout(r, 500));
 
-            const lastStage = (zapRunDetails?.zap.actions?.length || 1) - 1; // 1
+            const lastStage = (zapRunDetails?.zap.actions?.length || 1) - 1;
             console.log(lastStage);
             console.log(stage);
             if (lastStage !== stage) {
@@ -94,15 +126,13 @@ async function main() {
             }
 
             console.log("processing done");
-            // 
             await consumer.commitOffsets([{
                 topic: TOPIC_NAME,
                 partition: partition,
-                offset: (parseInt(message.offset) + 1).toString() // 5
+                offset: (parseInt(message.offset) + 1).toString()
             }])
         },
     })
-
 }
 
 main()

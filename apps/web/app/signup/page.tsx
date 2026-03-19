@@ -3,16 +3,16 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Zap, Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from "lucide-react";
+import { Zap, Eye, EyeOff, ArrowRight, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const BACKEND_URL = "http://localhost:3000";
 
 const perks = [
-    "Free forever for personal use",
-    "Unlimited Zap runs",
-    "Webhook support built in",
-    "Solana & Email integrations",
+    { text: "Free forever for personal use", emoji: "🎁" },
+    { text: "Unlimited Zap runs", emoji: "⚡" },
+    { text: "Webhook support built in", emoji: "🔗" },
+    { text: "Solana & Email integrations", emoji: "◎" },
 ];
 
 export default function Signup() {
@@ -45,7 +45,7 @@ export default function Signup() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || "Signup failed");
             localStorage.setItem("token", data.token);
-            toast.success("Account created! Welcome to FlowMate 🎉");
+            toast.success("Account created! Welcome to FlowMate!");
             router.push("/dashboard");
         } catch (err: any) {
             toast.error(err.message || "Something went wrong");
@@ -55,105 +55,107 @@ export default function Signup() {
     };
 
     return (
-        <div className="min-h-screen bg-hero-gradient flex">
+        <div className="min-h-screen bg-[#FEFCE8] flex">
             {/* Left panel */}
-            <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden bg-gradient-to-br from-amber-light to-cream">
-                <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-amber/10 blur-3xl" />
-                <div className="absolute bottom-0 left-0 w-60 h-60 rounded-full bg-emerald/5 blur-3xl" />
+            <div className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 bg-[#06D6A0] relative overflow-hidden border-r-2 border-black">
+                {/* Decorative shapes */}
+                <div className="absolute top-20 right-12 w-24 h-24 rounded-full bg-white border-2 border-black opacity-30" />
+                <div className="absolute bottom-24 right-24 w-16 h-16 rounded-xl bg-yellow-300 border-2 border-black rotate-12 opacity-50" />
+                <div className="absolute top-1/3 left-4 w-12 h-12 rounded-full bg-pink-400 border-2 border-black opacity-40" />
 
-                <Link href="/" className="relative flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-gradient flex items-center justify-center shadow-emerald">
-                        <Zap className="w-5 h-5 text-primary-foreground fill-current" />
+                <Link href="/" className="relative flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-white border-2 border-black shadow-[3px_3px_0_#1a1a1a] flex items-center justify-center">
+                        <Zap className="w-6 h-6 text-black fill-black" />
                     </div>
-                    <span className="font-display font-700 text-xl text-charcoal">FlowMate</span>
+                    <span className="font-black text-2xl text-black">FlowMate</span>
                 </Link>
 
                 <div className="relative">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber/20 border border-amber/30 mb-6">
-                        <span className="text-xs font-semibold text-amber-dark uppercase tracking-wide">Free to start</span>
+                    <div className="inline-block bg-yellow-300 border-2 border-black shadow-[3px_3px_0_#1a1a1a] rounded-xl px-4 py-2 mb-6">
+                        <span className="text-xs font-black text-black uppercase tracking-wide">Free to start</span>
                     </div>
-                    <h2 className="font-display text-4xl font-700 text-charcoal leading-tight mb-4">
-                        Build automations that actually work.
+                    <h2 className="font-black text-4xl text-black leading-tight mb-4">
+                        Build automations<br />that actually work.
                     </h2>
-                    <p className="text-muted-foreground text-lg mb-8">Join thousands of teams saving hours every week.</p>
+                    <p className="font-medium text-black/70 text-lg mb-8">Join thousands of teams saving hours every week.</p>
 
                     <ul className="space-y-3">
                         {perks.map((p, i) => (
-                            <li key={i} className="flex items-center gap-3">
-                                <div className="w-5 h-5 rounded-full bg-emerald-light flex items-center justify-center flex-shrink-0">
-                                    <CheckCircle className="w-3 h-3 text-emerald" />
-                                </div>
-                                <span className="text-sm text-foreground">{p}</span>
+                            <li key={i} className="flex items-center gap-3 bg-white/30 rounded-xl px-4 py-3 border-2 border-black/20">
+                                <span className="text-xl">{p.emoji}</span>
+                                <span className="text-sm font-bold text-black">{p.text}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
 
-                <p className="relative text-muted-foreground text-xs">© 2025 FlowMate. All rights reserved.</p>
+                <p className="relative text-black/50 text-xs font-medium">© 2025 FlowMate. All rights reserved.</p>
             </div>
 
-            {/* Right panel - form */}
+            {/* Right panel */}
             <div className="flex-1 flex flex-col justify-center items-center p-8">
                 {/* Mobile logo */}
                 <Link href="/" className="lg:hidden flex items-center gap-2 mb-8">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-gradient flex items-center justify-center shadow-emerald">
-                        <Zap className="w-4 h-4 text-primary-foreground fill-current" />
+                    <div className="w-9 h-9 rounded-xl bg-yellow-300 border-2 border-black shadow-[3px_3px_0_#1a1a1a] flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-black fill-black" />
                     </div>
-                    <span className="font-display font-700 text-lg text-foreground">FlowMate</span>
+                    <span className="font-black text-xl text-black">FlowMate</span>
                 </Link>
 
                 <div className="w-full max-w-sm">
                     <div className="mb-8">
-                        <h1 className="font-display text-3xl font-700 text-charcoal mb-2">Create your account</h1>
-                        <p className="text-muted-foreground">Start automating in seconds — no credit card needed</p>
+                        <div className="inline-block bg-pink-300 border-2 border-black shadow-[3px_3px_0_#1a1a1a] rounded-xl px-4 py-2 mb-4">
+                            <h1 className="font-black text-2xl text-black">Create account 🚀</h1>
+                        </div>
+                        <p className="font-medium text-gray-600">Start automating in seconds — no credit card needed</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">Full Name</label>
+                            <label className="block text-sm font-black text-black mb-2">Full Name</label>
                             <input
                                 type="text"
                                 value={form.name}
                                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                                 placeholder="John Doe"
-                                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-black bg-white text-black placeholder:text-gray-400 focus:outline-none focus:shadow-[0_0_0_3px_#FFD60A] transition-all text-sm font-medium shadow-[3px_3px_0_#1a1a1a]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">Username / Email</label>
+                            <label className="block text-sm font-black text-black mb-2">Username / Email</label>
                             <input
                                 type="text"
                                 value={form.username}
                                 onChange={(e) => setForm({ ...form, username: e.target.value })}
                                 placeholder="your@email.com"
-                                className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                                className="w-full px-4 py-3 rounded-xl border-2 border-black bg-white text-black placeholder:text-gray-400 focus:outline-none focus:shadow-[0_0_0_3px_#FFD60A] transition-all text-sm font-medium shadow-[3px_3px_0_#1a1a1a]"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-foreground mb-1.5">Password</label>
+                            <label className="block text-sm font-black text-black mb-2">Password</label>
                             <div className="relative">
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     value={form.password}
                                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                                     placeholder="Min. 6 characters"
-                                    className="w-full px-4 py-3 pr-12 rounded-xl border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-sm"
+                                    className="w-full px-4 py-3 pr-12 rounded-xl border-2 border-black bg-white text-black placeholder:text-gray-400 focus:outline-none focus:shadow-[0_0_0_3px_#FFD60A] transition-all text-sm font-medium shadow-[3px_3px_0_#1a1a1a]"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
                             </div>
                             {form.password && (
-                                <div className="mt-1.5 h-1 rounded-full bg-muted overflow-hidden">
+                                <div className="mt-2 h-2 rounded-full bg-gray-200 border border-black overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all ${form.password.length < 6 ? "w-1/3 bg-destructive" :
-                                            form.password.length < 10 ? "w-2/3 bg-amber" : "w-full bg-emerald"
+                                        className={`h-full rounded-full transition-all ${form.password.length < 6 ? "w-1/3 bg-red-500" :
+                                            form.password.length < 10 ? "w-2/3 bg-yellow-400" : "w-full bg-[#06D6A0]"
                                             }`}
                                     />
                                 </div>
@@ -163,10 +165,10 @@ export default function Signup() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold bg-emerald-gradient text-primary-foreground shadow-emerald hover:opacity-90 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-black text-white bg-black border-2 border-black shadow-[4px_4px_0_#FF4D6D] hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0_#FF4D6D] transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2 text-base"
                         >
                             {loading ? (
-                                <Loader2 className="w-4 h-4 animate-spin" />
+                                <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                                 <>
                                     Create account
@@ -176,17 +178,17 @@ export default function Signup() {
                         </button>
                     </form>
 
-                    <p className="mt-6 text-center text-sm text-muted-foreground">
+                    <p className="mt-6 text-center text-sm font-medium text-gray-600">
                         Already have an account?{" "}
-                        <Link href="/login" className="font-semibold text-primary hover:underline underline-offset-2">
-                            Sign in
+                        <Link href="/login" className="font-black text-black underline underline-offset-2 hover:text-[#FF4D6D] transition-colors">
+                            Sign in →
                         </Link>
                     </p>
 
-                    <p className="mt-4 text-center text-xs text-muted-foreground">
+                    <p className="mt-4 text-center text-xs text-gray-500">
                         By signing up you agree to our{" "}
-                        <span className="underline underline-offset-2 cursor-pointer">Terms</span> and{" "}
-                        <span className="underline underline-offset-2 cursor-pointer">Privacy Policy</span>
+                        <span className="underline underline-offset-2 cursor-pointer font-semibold">Terms</span> and{" "}
+                        <span className="underline underline-offset-2 cursor-pointer font-semibold">Privacy Policy</span>
                     </p>
                 </div>
             </div>
